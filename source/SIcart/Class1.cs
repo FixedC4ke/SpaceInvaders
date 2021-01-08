@@ -12,51 +12,33 @@ namespace SIcart
     [Guid("25D9880C-A39F-4BDD-BA0D-2D83BBB35346")]
     public interface ICart
     {
-        void Move(int step);
+        void Move(short step);
     }
 
     [Guid("41281675-0E7A-4A60-AFEB-F76E98C633C1")]
     [ClassInterface(ClassInterfaceType.None)]
     public class Cart: ICart
     {
-        public int position;
-        private object manager;
+        public int Offset { get; set; }
         public Cart()
         {
-            using (var mmFile = MemoryMappedFile.OpenExisting(
-                @"Global\SImmf", MemoryMappedFileRights.Write))
-            {
-                using (var acc = mmFile.CreateViewAccessor(0,0, MemoryMappedFileAccess.Write))
-                {
-                    int[] data = new int[1] { 10 };
-
-                    Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
-                    mutex.WaitOne();
-                    acc.WriteArray(0, data, 0, data.Length);
-                    mutex.ReleaseMutex();
-                }
-            }
         }
-        public void Move(int step)
+        public void Move(short step) //изменение координат для тачанки
         {
             using (var mmFile = MemoryMappedFile.OpenExisting(
                 @"Global\SImmf", MemoryMappedFileRights.ReadWrite))
             {
-                using (var acc = mmFile.CreateViewAccessor(0,0, MemoryMappedFileAccess.ReadWrite))
+                using (var acc = mmFile.CreateViewAccessor(0, 1024, MemoryMappedFileAccess.ReadWrite))
                 {
-                    int[] data = new int[1];
                     Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
                     mutex.WaitOne();
-                    acc.ReadArray(0, data, 0, data.Length);
-                    data[0] += step;
-                    acc.WriteArray(0, data, 0, data.Length);
+                    Entity entity;
+                    acc.Read(Offset, out entity);
+                    entity.X += step;
+                    acc.Write(Offset, ref entity);
                     mutex.ReleaseMutex();
                 }
             }
-        }
-        public void MoveToRight()
-        {
-
         }
     }
 }

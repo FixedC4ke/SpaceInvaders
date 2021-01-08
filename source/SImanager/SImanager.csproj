@@ -48,6 +48,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="Console2.cs" />
     <Compile Include="ConsoleArea.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
