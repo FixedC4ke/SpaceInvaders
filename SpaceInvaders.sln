@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneralLabTestCOM", "GeneralLabTestCOM\GeneralLabTestCOM.csproj", "{3C64D620-BED8-4BE5-9299-EB60DB904EB1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Main", "source\Main\Main.csproj", "{3C64D620-BED8-4BE5-9299-EB60DB904EB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIcart", "..\objtest2\objtest2\SIcart.csproj", "{287036B6-AB59-47DE-8864-2B8671634C0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIcart", "source\SIcart\SIcart.csproj", "{287036B6-AB59-47DE-8864-2B8671634C0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SImanager", "..\SImanager\SImanager\SImanager.csproj", "{AF55247D-0F4C-43A3-81CD-8C99CA601996}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SImanager", "source\SImanager\SImanager.csproj", "{AF55247D-0F4C-43A3-81CD-8C99CA601996}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
