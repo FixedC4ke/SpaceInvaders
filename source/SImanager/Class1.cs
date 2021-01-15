@@ -12,7 +12,7 @@ namespace SImanager
     [Guid("609CBC76-38A9-4DD1-A006-996167323C23")]
     public interface IManager
     {
-        int Draw();
+        int Draw(string name);
     }
     [Guid("21BA2D84-6D45-47F3-9ED8-F76F4CA6A93A")]
     [ClassInterface(ClassInterfaceType.None)]
@@ -55,12 +55,12 @@ namespace SImanager
                 }
             }
         }
-        public int Draw()
+        public int Draw(string name)
         {
             ConsoleArea na = new ConsoleArea(10, 5);
             na.SetDefaultBackground(ConsoleColor.White);
             Entity cart = new Entity() { X = (short)(_console2.Width / 2), Y = (short)(_console2.Height - na.Height)
-            ,TypeA=Marshal.StringToHGlobalAnsi("cart")};
+            ,TypeA=Marshal.StringToHGlobalAnsi(name)};
 
             using (var mmFile = MemoryMappedFile.OpenExisting(
     @"Global\SImmf", MemoryMappedFileRights.Write))

@@ -19,8 +19,14 @@ namespace GeneralLabTestCOM
             Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
             object cart = Activator.CreateInstance(CartT); //создание объекта-тачанки
 
-            int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, null); //вывод тачанки на консоль
+            Type ShipT = Type.GetTypeFromProgID("SIship.Ship");
+            object ship = Activator.CreateInstance(ShipT);
+
+            int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
+
+            offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" });
+            ShipT.GetProperty("Offset").SetValue(ship, offset);
 
             while (true) //обработка нажатия клавиш
             {
