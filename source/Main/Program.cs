@@ -27,7 +27,7 @@ namespace SpaceInvaders
 
             offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship1" });
             ShipT.GetProperty("Offset").SetValue(ship, offset);
-            ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { 100 });
+            ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth-5 });
 
             while (true) //обработка нажатия клавиш
             {
