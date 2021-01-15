@@ -25,7 +25,7 @@ namespace SpaceInvaders
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
 
-            offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" });
+            offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship1" });
             ShipT.GetProperty("Offset").SetValue(ship, offset);
             ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { 100 });
 

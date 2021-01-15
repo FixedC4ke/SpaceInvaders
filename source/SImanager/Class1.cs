@@ -21,6 +21,7 @@ namespace SImanager
         private readonly Console2 _console2;
         private readonly int length = 1024;
         private int used = 0;
+        private short prevShipPosition = 0;
         public int entitySize;
         public Manager()
         {
@@ -46,9 +47,23 @@ namespace SImanager
                     {
                         Entity entity;
                         acc.Read(i, out entity);
-                        ConsoleArea na = new ConsoleArea(10, 5);
-                        na.SetDefaultBackground(ConsoleColor.White);
-                        na.Write(Marshal.PtrToStringAnsi(entity.TypeA), 0, 0);
+                        ConsoleArea na;
+                        string name = Marshal.PtrToStringAnsi(entity.TypeA);
+
+                        if (name.Contains("cart"))
+                        {
+                            na = new ConsoleArea(10, 5);
+                            na.SetDefaultBackground(ConsoleColor.Green);
+                        }
+                        else if (name.Contains("ship"))
+                        {
+                            na = new ConsoleArea(5, 2);
+                            na.SetDefaultBackground(ConsoleColor.White);
+                        }
+                        else return;
+
+                        na.Write(name, 0, 0);
+
                         _console2.DrawArea(na, entity.X, entity.Y);
                     }
                     mutex.ReleaseMutex();
@@ -57,18 +72,27 @@ namespace SImanager
         }
         public int Draw(string name)
         {
-            ConsoleArea na = new ConsoleArea(10, 5);
-            na.SetDefaultBackground(ConsoleColor.White);
             Entity entity;
-            if (name.Contains("cart")) entity = new Entity() { X = (short)(_console2.Width / 2), Y = (short)(_console2.Height - na.Height)
-            ,TypeA=Marshal.StringToHGlobalAnsi(name)};
-            else entity = new Entity()
+            if (name.Contains("cart"))
             {
-                X = (short)(10),
-                Y = (short)(5)
-            ,
-                TypeA = Marshal.StringToHGlobalAnsi(name)
-            };
+                entity = new Entity()
+                {
+                    X = (short)(_console2.Width / 2),
+                    Y = (short)(_console2.Height - 5),
+                    TypeA = Marshal.StringToHGlobalAnsi(name)
+                };
+            }
+            else if (name.Contains("ship"))
+            {
+                prevShipPosition += 15;
+                entity = new Entity()
+                {
+                    X = prevShipPosition,
+                    Y = (short)(2),
+                    TypeA = Marshal.StringToHGlobalAnsi(name)
+                };
+            }
+            else return -1;
 
             using (var mmFile = MemoryMappedFile.OpenExisting(
     @"Global\SImmf", MemoryMappedFileRights.Write))
