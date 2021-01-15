@@ -6,7 +6,7 @@ using Microsoft.Win32.SafeHandles;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
 
-namespace GeneralLabTestCOM
+namespace SpaceInvaders
 {
     public class Program
     {
