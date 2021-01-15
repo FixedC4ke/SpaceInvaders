@@ -13,6 +13,7 @@ namespace SIship
     public interface IShip
     {
         void Move(Object x);
+        void Action(int maxX);
     }
 
     [Guid("0BC8F8F4-E572-4632-8EE5-A21B80499E13")]
@@ -20,9 +21,12 @@ namespace SIship
     public class Ship: IShip
     {
         public int Offset { get; set; }
+
+        private bool movesToRight = true;
+        private int maxX;
         public Ship()
         {
-            Timer t = new Timer(Move, null, 0, 500);
+            //
         }
         public void Move(Object x)
         {
@@ -36,11 +40,18 @@ namespace SIship
                     mutex.WaitOne();
                     Entity entity;
                     acc.Read(Offset, out entity);
-                    entity.X += step;
+                    if (entity.X <= 0 || entity.X >= maxX) { movesToRight = !movesToRight; entity.Y += 5; }
+                    if (movesToRight) entity.X += step;
+                    else entity.X -= step;
                     acc.Write(Offset, ref entity);
                     mutex.ReleaseMutex();
                 }
             }
+        }
+        public void Action(int maxX)
+        {
+            this.maxX = maxX;
+            Timer t = new Timer(Move, null, 0, 200);
         }
     }
 }

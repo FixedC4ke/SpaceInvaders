@@ -27,6 +27,7 @@ namespace GeneralLabTestCOM
 
             offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" });
             ShipT.GetProperty("Offset").SetValue(ship, offset);
+            ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { 100 });
 
             while (true) //обработка нажатия клавиш
             {

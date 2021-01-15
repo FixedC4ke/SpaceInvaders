@@ -64,8 +64,8 @@ namespace SImanager
             ,TypeA=Marshal.StringToHGlobalAnsi(name)};
             else entity = new Entity()
             {
-                X = (short)(_console2.Width / 2),
-                Y = (short)(na.Height+10)
+                X = (short)(10),
+                Y = (short)(5)
             ,
                 TypeA = Marshal.StringToHGlobalAnsi(name)
             };
