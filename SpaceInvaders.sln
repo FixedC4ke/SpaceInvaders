@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIcart", "source\SIcart\SIc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SImanager", "source\SImanager\SImanager.csproj", "{AF55247D-0F4C-43A3-81CD-8C99CA601996}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIship", "SIship\SIship.csproj", "{1DAED81D-8005-4DAE-88EE-88BF78DE1B6D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{AF55247D-0F4C-43A3-81CD-8C99CA601996}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF55247D-0F4C-43A3-81CD-8C99CA601996}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF55247D-0F4C-43A3-81CD-8C99CA601996}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DAED81D-8005-4DAE-88EE-88BF78DE1B6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DAED81D-8005-4DAE-88EE-88BF78DE1B6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DAED81D-8005-4DAE-88EE-88BF78DE1B6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DAED81D-8005-4DAE-88EE-88BF78DE1B6D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
