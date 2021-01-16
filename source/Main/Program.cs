@@ -10,24 +10,19 @@ namespace SpaceInvaders
 {
     public class Program
     {
-
+        private static readonly Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
+        private static readonly Type ShipT = Type.GetTypeFromProgID("SIship.Ship");
+        private static readonly Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
+        private static object manager;
         static void Main(string[] args)
         {
-            Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
-            object manager = Activator.CreateInstance(ManagerT); //создание объекта-диспетчера
+            manager = Activator.CreateInstance(ManagerT); //создание объекта-диспетчера
 
-            Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
             object cart = Activator.CreateInstance(CartT); //создание объекта-тачанки
-
-            Type ShipT = Type.GetTypeFromProgID("SIship.Ship");
-            object ship = Activator.CreateInstance(ShipT);
-
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
 
-            offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship1" });
-            ShipT.GetProperty("Offset").SetValue(ship, offset);
-            ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth-5 });
+            GenerateLineOfShipsOf(10);
 
             while (true) //обработка нажатия клавиш
             {
@@ -42,6 +37,18 @@ namespace SpaceInvaders
                 {
                     CartT.InvokeMember("Move", System.Reflection.BindingFlags.InvokeMethod, null, cart, new object[] { (short)-2 });
                 }
+            }
+        }
+
+
+        static void GenerateLineOfShipsOf(int n)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                object ship = Activator.CreateInstance(ShipT);
+                int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" + i.ToString() });
+                ShipT.GetProperty("Offset").SetValue(ship, offset);
+                ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
             }
         }
     }

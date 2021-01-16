@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO.MemoryMappedFiles;
+using System.Timers;
 
 namespace SImanager
 {
@@ -19,30 +20,27 @@ namespace SImanager
     public class Manager
     {
         private readonly Console2 _console2;
-        private readonly int length = 1024;
+        private static readonly int length = 1024;
         private int used = 0;
-        private short prevShipPosition = 0;
-        public int entitySize;
+        private short prevShipPosition = -10;
+        private short prevShipY = 0;
+        private static int entitySize = Marshal.SizeOf(typeof(Entity));
+        private static MemoryMappedFile mmFile = MemoryMappedFile.CreateFromFile("test.mmf", System.IO.FileMode.Create, @"Global\SImmf", length);
+        private static MemoryMappedViewAccessor acc = mmFile.CreateViewAccessor(0, length, MemoryMappedFileAccess.Read);
         public Manager()
         {
             _console2 = new Console2(110, 41, ConsoleColor.Black);
-            Timer t = new Timer(Update, null, 0, 100);
-            var mmFile = MemoryMappedFile.CreateNew(@"Global\SImmf", length);
+            System.Timers.Timer t = new System.Timers.Timer(10);
+            t.Elapsed += Update;
+            t.AutoReset = true;
+            t.Enabled = true;
             Mutex mutex = new Mutex(false, @"Global\SImutex");
             entitySize = Marshal.SizeOf(typeof(Entity));
 
         }
-        public void Update(Object x)
+        public void Update(Object source, ElapsedEventArgs e)
         {
             _console2.Clear();
-
-            using (var mmFile = MemoryMappedFile.OpenExisting(
-                @"Global\SImmf", MemoryMappedFileRights.Read))
-            {
-                using (var acc = mmFile.CreateViewAccessor(0,length, MemoryMappedFileAccess.Read))
-                {
-                    Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
-                    mutex.WaitOne();
                     for (int i = 0; i<used; i += entitySize)
                     {
                         Entity entity;
@@ -57,18 +55,14 @@ namespace SImanager
                         }
                         else if (name.Contains("ship"))
                         {
-                            na = new ConsoleArea(5, 2);
+                            na = new ConsoleArea(6, 2);
                             na.SetDefaultBackground(ConsoleColor.White);
                         }
                         else return;
 
                         na.Write(name, 0, 0);
-
                         _console2.DrawArea(na, entity.X, entity.Y);
                     }
-                    mutex.ReleaseMutex();
-                }
-            }
         }
         public int Draw(string name)
         {
@@ -84,11 +78,12 @@ namespace SImanager
             }
             else if (name.Contains("ship"))
             {
-                prevShipPosition += 15;
+                if (prevShipPosition<_console2.Width) prevShipPosition += 10;
+                else { prevShipPosition = -10; prevShipY += 3; }
                 entity = new Entity()
                 {
                     X = prevShipPosition,
-                    Y = (short)(2),
+                    Y = prevShipY,
                     TypeA = Marshal.StringToHGlobalAnsi(name)
                 };
             }
@@ -97,17 +92,17 @@ namespace SImanager
             using (var mmFile = MemoryMappedFile.OpenExisting(
     @"Global\SImmf", MemoryMappedFileRights.Write))
             {
+                Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
+                mutex.WaitOne();
                 using (var acc = mmFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Write))
                 {
-                    Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
-                    mutex.WaitOne();
                     if (used + entitySize < length)
                     {
                         acc.Write(used, ref entity);
                         used += entitySize;
                     }
-                    mutex.ReleaseMutex();
                 }
+                mutex.ReleaseMutex();
             }
             return used-entitySize; //вернуть смещение отображенного объекта
         }

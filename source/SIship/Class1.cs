@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
+using System.Diagnostics;
+using System.Timers;
 
 namespace SIship
 {
     [Guid("7042061C-5F90-4781-8E5B-C79750192636")]
     public interface IShip
     {
-        void Move(Object x);
         void Action(int maxX);
     }
 
@@ -24,34 +25,38 @@ namespace SIship
 
         private bool movesToRight = true;
         private int maxX;
+        private int entitySize = Marshal.SizeOf(typeof(Entity));
+        private short step = 2;
+        private static Mutex mutex;
+        private static MemoryMappedFile mmFile;
+
         public Ship()
         {
-            //
+            mutex = Mutex.OpenExisting(@"Global\SImutex");
+            mmFile = MemoryMappedFile.OpenExisting(
+                @"Global\SImmf", MemoryMappedFileRights.ReadWrite);
         }
-        public void Move(Object x)
+        public void Move(Object x, ElapsedEventArgs e)
         {
-            short step = 2;
-            using (var mmFile = MemoryMappedFile.OpenExisting(
-                @"Global\SImmf", MemoryMappedFileRights.ReadWrite))
-            {
-                using (var acc = mmFile.CreateViewAccessor(0, 1024, MemoryMappedFileAccess.ReadWrite))
+                mutex.WaitOne();
+                using (var acc = mmFile.CreateViewAccessor(Offset, entitySize, MemoryMappedFileAccess.ReadWrite))
                 {
-                    Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
-                    mutex.WaitOne();
                     Entity entity;
-                    acc.Read(Offset, out entity);
-                    if (entity.X <= 0 || entity.X >= maxX) { movesToRight = !movesToRight; entity.Y += 5; }
+                    acc.Read(0, out entity);
+                    if (entity.X < 0 || entity.X > maxX) { movesToRight = !movesToRight; entity.Y += 3; }
                     if (movesToRight) entity.X += step;
                     else entity.X -= step;
-                    acc.Write(Offset, ref entity);
-                    mutex.ReleaseMutex();
+                    acc.Write(0, ref entity);
                 }
-            }
+                mutex.ReleaseMutex();
         }
         public void Action(int maxX)
         {
             this.maxX = maxX;
-            Timer t = new Timer(Move, null, 0, 200);
+            System.Timers.Timer t = new System.Timers.Timer(500);
+            t.Elapsed += Move;
+            t.AutoReset = true;
+            t.Enabled = true;
         }
     }
 }

@@ -17,27 +17,28 @@ namespace SIcart
 
     [Guid("41281675-0E7A-4A60-AFEB-F76E98C633C1")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class Cart: ICart
+    public class Cart : ICart
     {
         public int Offset { get; set; }
+        private static Mutex mutex;
         public Cart()
         {
+            mutex = Mutex.OpenExisting(@"Global\SImutex");
         }
         public void Move(short step) //изменение координат для тачанки
         {
             using (var mmFile = MemoryMappedFile.OpenExisting(
                 @"Global\SImmf", MemoryMappedFileRights.ReadWrite))
             {
+                mutex.WaitOne();
                 using (var acc = mmFile.CreateViewAccessor(0, 1024, MemoryMappedFileAccess.ReadWrite))
                 {
-                    Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
-                    mutex.WaitOne();
                     Entity entity;
                     acc.Read(Offset, out entity);
                     entity.X += step;
                     acc.Write(Offset, ref entity);
-                    mutex.ReleaseMutex();
                 }
+                mutex.ReleaseMutex();
             }
         }
     }
