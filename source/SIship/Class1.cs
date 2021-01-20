@@ -19,7 +19,7 @@ namespace SIship
 
     [Guid("0BC8F8F4-E572-4632-8EE5-A21B80499E13")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class Ship: IShip
+    public class Ship : IShip
     {
         public int Offset { get; set; }
 
@@ -29,6 +29,7 @@ namespace SIship
         private short step = 2;
         private static Mutex mutex;
         private static MemoryMappedFile mmFile;
+        private System.Timers.Timer t = new System.Timers.Timer(500);
 
         public Ship()
         {
@@ -38,25 +39,35 @@ namespace SIship
         }
         public void Move(Object x, ElapsedEventArgs e)
         {
-                mutex.WaitOne();
-                using (var acc = mmFile.CreateViewAccessor(Offset, entitySize, MemoryMappedFileAccess.ReadWrite))
+            mutex.WaitOne();
+            using (var acc = mmFile.CreateViewAccessor(Offset, entitySize, MemoryMappedFileAccess.ReadWrite))
+            {
+                Entity entity;
+                acc.Read(0, out entity);
+                if (Marshal.PtrToStringAnsi(entity.TypeA).Contains("del")) 
                 {
-                    Entity entity;
-                    acc.Read(0, out entity);
+                    Stop();
+                }
+                else
+                {
                     if (entity.X < 0 || entity.X > maxX) { movesToRight = !movesToRight; entity.Y += 3; }
                     if (movesToRight) entity.X += step;
                     else entity.X -= step;
                     acc.Write(0, ref entity);
                 }
-                mutex.ReleaseMutex();
+            }
+            mutex.ReleaseMutex();
         }
         public void Action(int maxX)
         {
             this.maxX = maxX;
-            System.Timers.Timer t = new System.Timers.Timer(500);
             t.Elapsed += Move;
             t.AutoReset = true;
             t.Enabled = true;
+        }
+        public void Stop()
+        {
+            t.Enabled = false;
         }
     }
 }
