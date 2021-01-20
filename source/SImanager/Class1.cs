@@ -38,6 +38,9 @@ namespace SImanager
             entitySize = Marshal.SizeOf(typeof(Entity));
 
         }
+        public static short XglobalCart;
+        public static short YglobalCart;
+
         public void Update(Object source, ElapsedEventArgs e)
         {
             _console2.Clear();
@@ -48,15 +51,24 @@ namespace SImanager
                         ConsoleArea na;
                         string name = Marshal.PtrToStringAnsi(entity.TypeA);
 
+
                         if (name.Contains("cart"))
                         {
-                            na = new ConsoleArea(10, 5);
-                            na.SetDefaultBackground(ConsoleColor.Green);
+                          XglobalCart = (short)(entity.X + 4);
+                          YglobalCart = (short)(entity.Y - 2);
+                          na = new ConsoleArea(9, 5);
+                          na.SetDefaultBackground(ConsoleColor.Green);
+                            
                         }
                         else if (name.Contains("ship"))
                         {
                             na = new ConsoleArea(6, 2);
                             na.SetDefaultBackground(ConsoleColor.White);
+                        }
+                        else if (name.Contains("patron"))
+                        {
+                            na = new ConsoleArea(1, 2);
+                            na.SetDefaultBackground(ConsoleColor.Red);
                         }
                         else return;
 
@@ -78,12 +90,21 @@ namespace SImanager
             }
             else if (name.Contains("ship"))
             {
-                if (prevShipPosition<_console2.Width) prevShipPosition += 10;
+                if (prevShipPosition < _console2.Width) prevShipPosition += 10;
                 else { prevShipPosition = -10; prevShipY += 3; }
                 entity = new Entity()
                 {
                     X = prevShipPosition,
                     Y = prevShipY,
+                    TypeA = Marshal.StringToHGlobalAnsi(name)
+                };
+            }
+            else if (name.Contains("patron"))
+            {
+                entity = new Entity()
+                {
+                    X = XglobalCart,
+                    Y = YglobalCart,
                     TypeA = Marshal.StringToHGlobalAnsi(name)
                 };
             }
@@ -94,7 +115,7 @@ namespace SImanager
             {
                 Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
                 mutex.WaitOne();
-                using (var acc = mmFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.Write))
+                using (var acc = mmFile.CreateViewAccessor(0, 1024, MemoryMappedFileAccess.Write))
                 {
                     if (used + entitySize < length)
                     {
