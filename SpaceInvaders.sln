@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SettingsActiveX", "source\S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slpatron", "source\Sipatron\Slpatron.csproj", "{6EAE98A1-99A6-4FD0-A3C1-6577388B39C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIbomb", "SIbomb\SIbomb.csproj", "{391C1776-E63D-4A4B-99E6-187096D9D4C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SIbomb", "source\SIbomb\SIbomb.csproj", "{391C1776-E63D-4A4B-99E6-187096D9D4C3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
