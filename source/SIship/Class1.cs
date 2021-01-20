@@ -49,6 +49,7 @@ namespace SIship
                 if (Marshal.PtrToStringAnsi(entity.TypeA).Contains("del")) 
                 {
                     Stop();
+                    DrawShip(entity.X, entity.Y, true);
                 }
                 else
                 {
@@ -73,6 +74,7 @@ namespace SIship
         public void Stop()
         {
             t.Enabled = false;
+            t.AutoReset = false;
         }
     }
 }
