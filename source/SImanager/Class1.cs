@@ -19,7 +19,6 @@ namespace SImanager
     [ClassInterface(ClassInterfaceType.None)]
     public class Manager
     {
-        private readonly Console2 _console2;
         private static readonly int length = 1024;
         private int used = 0;
         private short prevShipPosition = -10;
@@ -36,7 +35,7 @@ namespace SImanager
         private static Dictionary<int, dynamic> objects = new Dictionary<int, dynamic>();
         public Manager()
         {
-            _console2 = new Console2(110, 41, ConsoleColor.Black);
+
             System.Timers.Timer t = new System.Timers.Timer(10);
             t.Elapsed += Update;
             t.AutoReset = true;
@@ -49,7 +48,6 @@ namespace SImanager
 
             Mutex mutex = new Mutex(false, @"Global\SImutex");
             entitySize = Marshal.SizeOf(typeof(Entity));
-
         }
         public static short XglobalCart;
         public static short YglobalCart;
@@ -57,12 +55,10 @@ namespace SImanager
 
         public void Update(Object source, ElapsedEventArgs e)
         {
-            _console2.Clear();
             for (int i = 0; i < used; i += entitySize)
             {
                 Entity entity;
                 acc.Read(i, out entity);
-                ConsoleArea na;
                 string name = Marshal.PtrToStringAnsi(entity.TypeA);
 
 
@@ -70,14 +66,10 @@ namespace SImanager
                 {
                     XglobalCart = (short)(entity.X + 4);
                     YglobalCart = (short)(entity.Y - 2);
-                    na = new ConsoleArea(9, 5);
-                    na.SetDefaultBackground(ConsoleColor.Green);
 
                 }
                 else if (name.Contains("ship"))
                 {
-                    na = new ConsoleArea(6, 2);
-                    na.SetDefaultBackground(ConsoleColor.White);
                     if (generateBomb)
                     {
                         generateBomb = false;
@@ -91,27 +83,21 @@ namespace SImanager
                 }
                 else if (name.Contains("patron"))
                 {
-                    na = new ConsoleArea(1, 2);
-                    na.SetDefaultBackground(ConsoleColor.Red);
 
-                    if (entity.Y <= 0)
+                    if (entity.Y < 0)
                     {
                         DestroyObject(i);
                     }
                 }
                 else if (name.Contains("bomb"))
                 {
-                    na = new ConsoleArea(1, 2);
-                    na.SetDefaultBackground(ConsoleColor.Yellow);
-                    if (entity.Y > _console2.Height)
+                    if (entity.Y > Console.WindowHeight)
                     {
                         DestroyObject(i);
                     }
                 }
                 else return;
 
-                na.Write(name, 0, 0);
-                _console2.DrawArea(na, entity.X, entity.Y);
             }
         }
         public int Draw(dynamic obj, string name)
@@ -121,14 +107,14 @@ namespace SImanager
             {
                 entity = new Entity()
                 {
-                    X = (short)(_console2.Width / 2),
-                    Y = (short)(_console2.Height - 5),
+                    X = (short)(Console.WindowWidth / 2),
+                    Y = (short)(Console.WindowHeight - 5),
                     TypeA = Marshal.StringToHGlobalAnsi(name)
                 };
             }
             else if (name.Contains("ship"))
             {
-                if (prevShipPosition < _console2.Width) prevShipPosition += 10;
+                if (prevShipPosition < Console.WindowWidth) prevShipPosition += 10;
                 else { prevShipPosition = -10; prevShipY += 3; }
                 entity = new Entity()
                 {

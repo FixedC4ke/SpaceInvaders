@@ -26,6 +26,8 @@ namespace SIpatron
         public int Offset { get; set; }
         private static Mutex mutex;
         private System.Timers.Timer t = new System.Timers.Timer(50);
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawPatron")]
+        internal static extern int DrawPatron(short x, short y, bool clean);
 
 
         public Patron()
@@ -49,8 +51,11 @@ namespace SIpatron
                     }
                     else
                     {
-                        entity.Y -= 2;
-                        acc.Write(Offset, ref entity);
+                            short[] prevpos = { entity.X, entity.Y };
+                            entity.Y -= 2;
+                            acc.Write(Offset, ref entity);
+                            DrawPatron(prevpos[0], prevpos[1], true);
+                            DrawPatron(entity.X, entity.Y, false);
                     }
                 }
                 mutex.ReleaseMutex();

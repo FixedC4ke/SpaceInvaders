@@ -1,0 +1,7 @@
+LIBRARY SIConsoleAPI
+EXPORTS
+	DrawCart
+	DrawShip
+	DrawPatron
+	DrawBomb
+	InitializeConsole

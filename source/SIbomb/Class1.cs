@@ -26,6 +26,8 @@ namespace SIbomb
         public int Offset { get; set; }
         private static Mutex mutex;
         private System.Timers.Timer t = new System.Timers.Timer(50);
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawBomb")]
+        internal static extern int DrawBomb(short x, short y, bool clean);
 
         public Bomb()
         {
@@ -48,8 +50,12 @@ namespace SIbomb
                     }
                     else
                     {
+                        short[] prevpos = { entity.X, entity.Y };
                         entity.Y += 2;
                         acc.Write(Offset, ref entity);
+                        DrawBomb(prevpos[0], prevpos[1], true);
+                        DrawBomb(entity.X, entity.Y, false);
+
                     }
                 }
                 mutex.ReleaseMutex();

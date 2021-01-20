@@ -30,6 +30,8 @@ namespace SIship
         private static Mutex mutex;
         private static MemoryMappedFile mmFile;
         private System.Timers.Timer t = new System.Timers.Timer(500);
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawShip")]
+        internal static extern int DrawShip(short x, short y, bool clean);
 
         public Ship()
         {
@@ -50,10 +52,13 @@ namespace SIship
                 }
                 else
                 {
+                    short[] prevpos = { entity.X, entity.Y };
                     if (entity.X < 0 || entity.X > maxX) { movesToRight = !movesToRight; entity.Y += 3; }
                     if (movesToRight) entity.X += step;
                     else entity.X -= step;
                     acc.Write(0, ref entity);
+                    DrawShip(prevpos[0], prevpos[1], true);
+                    DrawShip(entity.X, entity.Y, false);
                 }
             }
             mutex.ReleaseMutex();

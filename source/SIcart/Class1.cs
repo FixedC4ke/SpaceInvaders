@@ -9,6 +9,7 @@ using System.Threading;
 
 namespace SIcart
 {
+
     [Guid("25D9880C-A39F-4BDD-BA0D-2D83BBB35346")]
     public interface ICart
     {
@@ -19,6 +20,8 @@ namespace SIcart
     [ClassInterface(ClassInterfaceType.None)]
     public class Cart : ICart
     {
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawCart")]
+        internal static extern int DrawCart(short x, short y, bool clean);
         public int Offset { get; set; }
         private static Mutex mutex;
         public Cart()
@@ -35,8 +38,11 @@ namespace SIcart
                 {
                     Entity entity;
                     acc.Read(Offset, out entity);
+                    short[] prevpos = { entity.X, entity.Y };
                     entity.X += step;
                     acc.Write(Offset, ref entity);
+                    DrawCart(prevpos[0], prevpos[1], true);
+                    DrawCart(entity.X, entity.Y, false);
                 }
                 mutex.ReleaseMutex();
             }

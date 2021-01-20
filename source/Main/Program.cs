@@ -18,8 +18,12 @@ namespace SpaceInvaders
         private static readonly Type SettingsT = Type.GetTypeFromProgID("SettingsActiveX.pdf_Reader");
 
         private static object manager;
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "InitializeConsole")]
+        internal static extern int InitializeConsole();
+
         static void Main(string[] args)
         {
+            InitializeConsole();
             manager = Activator.CreateInstance(ManagerT); //создание объекта-диспетчера
 
             object cart = Activator.CreateInstance(CartT); //создание объекта-тачанки
