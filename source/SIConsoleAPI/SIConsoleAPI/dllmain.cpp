@@ -112,5 +112,6 @@ extern "C" int _stdcall InitializeConsole() {
     SetConsoleWindowInfo(wHnd, true, &pos);
     SetConsoleScreenBufferSize(wHnd, bufsize);
     SetConsoleCursorInfo(wHnd, &cinfo);
+    SetConsoleTitleA("Space Invaders");
     return 0;
 }

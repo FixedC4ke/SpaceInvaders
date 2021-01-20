@@ -63,11 +63,15 @@ namespace SpaceInvaders
                 }
                 else if (key.Key == ConsoleKey.Spacebar)
                 {
-                    object patron = Activator.CreateInstance(PatronT);
+                    bool ready = (bool)CartT.InvokeMember("Shoot", System.Reflection.BindingFlags.InvokeMethod, null, cart, null);
+                    if (ready)
+                    {
+                        object patron = Activator.CreateInstance(PatronT);
 
-                    int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] {patron, "patron" }); //вывод тачанки на консоль
-                    PatronT.GetProperty("Offset").SetValue(patron, offset2);
-                    PatronT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, patron, null);
+                        int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { patron, "patron" }); //вывод тачанки на консоль
+                        PatronT.GetProperty("Offset").SetValue(patron, offset2);
+                        PatronT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, patron, null);
+                    }
 
                 }
             }

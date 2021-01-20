@@ -21,7 +21,7 @@ namespace SIpatron
 
     [Guid("EDAA681F-C543-469C-9F5E-C09962298D76")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class Patron: SIpatron
+    public class Patron : SIpatron
     {
         public int Offset { get; set; }
         private static Mutex mutex;
@@ -51,11 +51,11 @@ namespace SIpatron
                     }
                     else
                     {
-                            short[] prevpos = { entity.X, entity.Y };
-                            entity.Y -= 2;
-                            acc.Write(Offset, ref entity);
-                            DrawPatron(prevpos[0], prevpos[1], true);
-                            DrawPatron(entity.X, entity.Y, false);
+                        short[] prevpos = { entity.X, entity.Y };
+                        entity.Y -= 2;
+                        acc.Write(Offset, ref entity);
+                        DrawPatron(prevpos[0], prevpos[1], true);
+                        DrawPatron(entity.X, entity.Y, false);
                     }
                 }
                 mutex.ReleaseMutex();

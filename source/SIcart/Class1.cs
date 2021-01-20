@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
+using System.Timers;
 
 namespace SIcart
 {
@@ -14,6 +15,7 @@ namespace SIcart
     public interface ICart
     {
         void Move(short step);
+        bool Shoot();
     }
 
     [Guid("41281675-0E7A-4A60-AFEB-F76E98C633C1")]
@@ -24,9 +26,14 @@ namespace SIcart
         internal static extern int DrawCart(short x, short y, bool clean);
         public int Offset { get; set; }
         private static Mutex mutex;
+        private bool readytoshoot = true;
+        private static System.Timers.Timer shottimer = new System.Timers.Timer();
         public Cart()
         {
             mutex = Mutex.OpenExisting(@"Global\SImutex");
+            shottimer.Elapsed += SetReady;
+            shottimer.Interval = 2000;
+            shottimer.AutoReset = false;
         }
         public void Move(short step) //изменение координат для тачанки
         {
@@ -46,6 +53,20 @@ namespace SIcart
                 }
                 mutex.ReleaseMutex();
             }
+        }
+        public bool Shoot()
+        {
+            if (readytoshoot)
+            {
+                readytoshoot = false;
+                shottimer.Start();
+                return true;
+            }
+            return false;
+        }
+        private void SetReady(Object source, ElapsedEventArgs e)
+        {
+            readytoshoot = true;
         }
     }
 }
