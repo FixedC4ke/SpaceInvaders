@@ -16,6 +16,7 @@ namespace SIbomb
     {
         void Move(Object x, ElapsedEventArgs e);
         void Action();
+        void Stop();
     }
 
     [Guid("2EA11A3B-1277-4D69-88A8-2A6CEAC762BA")]
@@ -24,6 +25,7 @@ namespace SIbomb
     {
         public int Offset { get; set; }
         private static Mutex mutex;
+        private System.Timers.Timer t = new System.Timers.Timer(50);
 
         public Bomb()
         {
@@ -40,8 +42,15 @@ namespace SIbomb
                 {
                     Entity entity;
                     acc.Read(Offset, out entity);
-                    entity.Y += 2;
-                    acc.Write(Offset, ref entity);
+                    if (Marshal.PtrToStringAnsi(entity.TypeA).Contains("del"))
+                    {
+                        Stop();
+                    }
+                    else
+                    {
+                        entity.Y += 2;
+                        acc.Write(Offset, ref entity);
+                    }
                 }
                 mutex.ReleaseMutex();
             }
@@ -51,10 +60,13 @@ namespace SIbomb
 
         public void Action()
         {
-            System.Timers.Timer t = new System.Timers.Timer(50);
             t.Elapsed += Move;
             t.AutoReset = true;
             t.Enabled = true;
+        }
+        public void Stop()
+        {
+            t.Enabled = false;
         }
     }
 }

@@ -16,6 +16,7 @@ namespace SIpatron
     {
         void Move(Object x, ElapsedEventArgs e);
         void Action();
+        void Stop();
     }
 
     [Guid("EDAA681F-C543-469C-9F5E-C09962298D76")]
@@ -24,6 +25,8 @@ namespace SIpatron
     {
         public int Offset { get; set; }
         private static Mutex mutex;
+        private System.Timers.Timer t = new System.Timers.Timer(50);
+
 
         public Patron()
         {
@@ -40,8 +43,15 @@ namespace SIpatron
                 {
                     Entity entity;
                     acc.Read(Offset, out entity);
-                    entity.Y -= 2;
-                    acc.Write(Offset, ref entity);
+                    if (Marshal.PtrToStringAnsi(entity.TypeA).Contains("del"))
+                    {
+                        Stop();
+                    }
+                    else
+                    {
+                        entity.Y -= 2;
+                        acc.Write(Offset, ref entity);
+                    }
                 }
                 mutex.ReleaseMutex();
             }
@@ -51,10 +61,13 @@ namespace SIpatron
 
         public void Action()
         {
-            System.Timers.Timer t = new System.Timers.Timer(50);
             t.Elapsed += Move;
             t.AutoReset = true;
             t.Enabled = true;
+        }
+        public void Stop()
+        {
+            t.Enabled = false;
         }
     }
 }

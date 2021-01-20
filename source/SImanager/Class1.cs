@@ -29,6 +29,11 @@ namespace SImanager
         private static MemoryMappedViewAccessor acc = mmFile.CreateViewAccessor(0, length, MemoryMappedFileAccess.Read);
         private bool generateBomb = false;
         private static Type BombT = Type.GetTypeFromProgID("SIbomb.Bomb");
+        private static readonly Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
+        private static readonly Type ShipT = Type.GetTypeFromProgID("SIship.Ship");
+        private static readonly Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
+        private static readonly Type PatronT = Type.GetTypeFromProgID("SIpatron.Patron");
+        private static Dictionary<int, dynamic> objects = new Dictionary<int, dynamic>();
         public Manager()
         {
             _console2 = new Console2(110, 41, ConsoleColor.Black);
@@ -37,10 +42,10 @@ namespace SImanager
             t.AutoReset = true;
             t.Enabled = true;
 
-            //System.Timers.Timer tb = new System.Timers.Timer(50000);
-            //t.Elapsed += CreateBomb;
-            //t.AutoReset = true;
-            //t.Enabled = true;
+            System.Timers.Timer tb = new System.Timers.Timer(5000);
+            tb.Elapsed += CreateBomb;
+            tb.AutoReset = true;
+            tb.Enabled = true;
 
             Mutex mutex = new Mutex(false, @"Global\SImutex");
             entitySize = Marshal.SizeOf(typeof(Entity));
@@ -80,7 +85,7 @@ namespace SImanager
 
                         globalShip[0] = entity.X;
                         globalShip[1] = entity.Y;
-                        BombT.GetProperty("Offset").SetValue(bomb, Draw("bomb1"));
+                        BombT.GetProperty("Offset").SetValue(bomb, Draw(bomb, "bomb"));
                         BombT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, bomb, null);
                     }
                 }
@@ -88,6 +93,11 @@ namespace SImanager
                 {
                     na = new ConsoleArea(1, 2);
                     na.SetDefaultBackground(ConsoleColor.Red);
+
+                    if (entity.Y <= 0)
+                    {
+                        DestroyObject(i);
+                    }
                 }
                 else if (name.Contains("bomb"))
                 {
@@ -104,7 +114,7 @@ namespace SImanager
                 _console2.DrawArea(na, entity.X, entity.Y);
             }
         }
-        public int Draw(string name)
+        public int Draw(dynamic obj, string name)
         {
             Entity entity;
             if (name.Contains("cart"))
@@ -152,8 +162,21 @@ namespace SImanager
             {
                 Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
                 mutex.WaitOne();
-                using (var acc = mmFile.CreateViewAccessor(0, 1024, MemoryMappedFileAccess.Write))
+                using (var acc = mmFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.ReadWrite))
                 {
+
+                    Entity entity1;
+                    int i;
+                    for (i = 0; i<used; i += entitySize)
+                    {
+                        acc.Read(i, out entity1);
+                        if (Marshal.PtrToStringAnsi(entity1.TypeA).Contains("del"))
+                        {
+                            acc.Write(i, ref entity);
+                            mutex.ReleaseMutex();
+                            return i;
+                        }
+                    }
                     if (used + entitySize < length)
                     {
                         acc.Write(used, ref entity);
@@ -162,6 +185,7 @@ namespace SImanager
                 }
                 mutex.ReleaseMutex();
             }
+            objects.Add(used - entitySize, obj);
             return used - entitySize; //вернуть смещение отображенного объекта
         }
 
@@ -173,13 +197,12 @@ namespace SImanager
             {
                 Mutex mutex = Mutex.OpenExisting(@"Global\SImutex");
                 mutex.WaitOne();
-                using (var acc = mmFile.CreateViewAccessor(0, 1024, MemoryMappedFileAccess.Write))
+                using (var acc = mmFile.CreateViewAccessor(0, 0, MemoryMappedFileAccess.ReadWrite))
                 {
-                    if (used + entitySize < length)
-                    {
-                        acc.Write(offset, 0);
-                        used -= entitySize;
-                    }
+                    Entity entity;
+                    acc.Read(offset, out entity);
+                    entity.TypeA = Marshal.StringToHGlobalAnsi("del");
+                    acc.Write(offset, ref entity);
                 }
                 mutex.ReleaseMutex();
             }
