@@ -46,7 +46,9 @@ namespace SIbomb
                     acc.Read(Offset, out entity);
                     if (Marshal.PtrToStringAnsi(entity.TypeA).Contains("del"))
                     {
+
                         Stop();
+                        DrawBomb(entity.X, entity.Y, true);
                     }
                     else
                     {

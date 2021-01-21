@@ -49,6 +49,7 @@ namespace SIpatron
                     if (Marshal.PtrToStringAnsi(entity.TypeA).Contains("del"))
                     {
                         Stop();
+                        DrawPatron(entity.X, entity.Y, true);
                     }
                     else
                     {

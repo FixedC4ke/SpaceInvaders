@@ -200,6 +200,9 @@ namespace SImanager
                 string name = Marshal.PtrToStringAnsi(entity.TypeA);
                 if (name.Contains("patron"))
                 {
+                    if (entity.Y <= 0) { 
+                        DestroyObject(i); return; 
+                    }
                     globalPatron[0] = entity.X; globalPatron[1] = entity.Y;
                 }
                 if (i == used - entitySize && globalPatron[0] == -1) return;
