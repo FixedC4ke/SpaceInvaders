@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -111,6 +112,17 @@ extern "C" int _stdcall DrawBomb(short x, short y, bool clean)
     return 0;
 }
 
+extern "C" int _stdcall ShowHP(short x) {
+    HANDLE wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    COORD curspos = { 2, 40 };
+    DWORD written = 0;
+    string message = "Lives: " + to_string(x);
+    SetConsoleCursorPosition(wHnd, curspos);
+    WriteConsoleA(wHnd, message.c_str(), strlen(message.c_str()), &written, NULL);
+    return 0;
+}
+
 extern "C" int _stdcall InitializeConsole() {
     HANDLE wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -123,8 +135,5 @@ extern "C" int _stdcall InitializeConsole() {
     SetConsoleScreenBufferSize(wHnd, bufsize);
     SetConsoleCursorInfo(wHnd, &cinfo);
     SetConsoleTitleA("Space Invaders");
-    DWORD outp;
-    COORD fcord = { 0, 0 };
-    COORD cpos = { 20, 50 };
     return 0;
 }

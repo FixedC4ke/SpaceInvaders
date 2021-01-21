@@ -14,10 +14,15 @@ namespace SImanager
     public interface IManager
     {
         int Draw(string name);
+        void CreatePatron();
+
+        void CheckHit();
+        bool CheckCartHit();
+        void DestroyObject(int offset);
     }
     [Guid("21BA2D84-6D45-47F3-9ED8-F76F4CA6A93A")]
     [ClassInterface(ClassInterfaceType.None)]
-    public class Manager
+    public class Manager: IManager
     {
         private static readonly int length = 1024;
         private int used = 0;
@@ -26,26 +31,31 @@ namespace SImanager
         private static int entitySize = Marshal.SizeOf(typeof(Entity));
         private static MemoryMappedFile mmFile = MemoryMappedFile.CreateFromFile("test.mmf", System.IO.FileMode.Create, @"Global\SImmf", length);
         private static MemoryMappedViewAccessor acc = mmFile.CreateViewAccessor(0, length, MemoryMappedFileAccess.Read);
-        private bool generateBomb = false;
         private static Type BombT = Type.GetTypeFromProgID("SIbomb.Bomb");
         private static readonly Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
         private static readonly Type ShipT = Type.GetTypeFromProgID("SIship.Ship");
         private static readonly Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
         private static readonly Type PatronT = Type.GetTypeFromProgID("SIpatron.Patron");
         private static Dictionary<int, dynamic> objects = new Dictionary<int, dynamic>();
+        private delegate int HPEvent(short x);
+        private event HPEvent HPChanged;
+
+        private short hp;
+        private short CartHP
+        {
+            get { return hp; }
+            set { HPChanged(value); hp = value; }
+        }
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "ShowHP")]
+        internal static extern int ShowHP(short x);
         public Manager()
         {
-
-            System.Timers.Timer t = new System.Timers.Timer(10);
-            t.Elapsed += Update;
-            t.AutoReset = true;
-            t.Enabled = true;
-
             System.Timers.Timer tb = new System.Timers.Timer(5000);
             tb.Elapsed += CreateBomb;
             tb.AutoReset = true;
             tb.Enabled = true;
-
+            HPChanged += ShowHP;
+            CartHP = 3;
             Mutex mutex = new Mutex(false, @"Global\SImutex");
             entitySize = Marshal.SizeOf(typeof(Entity));
         }
@@ -53,46 +63,7 @@ namespace SImanager
         public static short YglobalCart;
         public static short[] globalShip = new short[2];
 
-        public void Update(Object source, ElapsedEventArgs e)
-        {
-            for (int i = 0; i < used; i += entitySize)
-            {
-                Entity entity;
-                acc.Read(i, out entity);
-                string name = Marshal.PtrToStringAnsi(entity.TypeA);
-
-
-                if (name.Contains("cart"))
-                {
-                    XglobalCart = (short)(entity.X + 4);
-                    YglobalCart = (short)(entity.Y - 2);
-
-                }
-                else if (name.Contains("ship"))
-                {
-                    if (generateBomb)
-                    {
-                        generateBomb = false;
-                        dynamic bomb = Activator.CreateInstance(BombT);
-
-                        globalShip[0] = entity.X;
-                        globalShip[1] = entity.Y;
-                        BombT.GetProperty("Offset").SetValue(bomb, Draw(bomb, "bomb"));
-                        BombT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, bomb, null);
-                    }
-                }
-                else if (name.Contains("bomb"))
-                {
-                    if (entity.Y > Console.WindowHeight)
-                    {
-                        DestroyObject(i);
-                    }
-                }
-                else return;
-
-            }
-        }
-        public int Draw(dynamic obj, string name)
+        public int Draw(string name)
         {
             Entity entity;
             if (name.Contains("cart"))
@@ -167,7 +138,7 @@ namespace SImanager
         }
 
 
-        private void DestroyObject(int offset)
+        public void DestroyObject(int offset)
         {
             using (var mmFile = MemoryMappedFile.OpenExisting(
     @"Global\SImmf", MemoryMappedFileRights.Write))
@@ -187,12 +158,38 @@ namespace SImanager
 
         private void CreateBomb(Object source, ElapsedEventArgs e)
         {
-            generateBomb = true;
+            Entity entity;
+            for (int i = 0; i < used; i += entitySize)
+            {
+                acc.Read(i, out entity);
+                string name = Marshal.PtrToStringAnsi(entity.TypeA);
+                if (name.Contains("ship"))
+                {
+                    dynamic bomb = Activator.CreateInstance(BombT);
+                    BombT.GetField("Manager").SetValue(bomb, this);
+
+                    globalShip[0] = entity.X;
+                    globalShip[1] = entity.Y;
+                    BombT.GetProperty("Offset").SetValue(bomb, Draw("bomb"));
+                    BombT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, bomb, null);
+                    return;
+                }
+            }
         }
 
         public void CreatePatron()
         {
-
+            Entity entity;
+            for (int i = 0; i<used; i += entitySize)
+            {
+                acc.Read(i, out entity);
+                string name = Marshal.PtrToStringAnsi(entity.TypeA);
+                if (name.Contains("cart"))
+                {
+                    XglobalCart = (short)(entity.X+4);
+                    YglobalCart = (short)(entity.Y-2);
+                }
+            }
         }
 
         public void CheckHit()
@@ -210,7 +207,7 @@ namespace SImanager
                     }
                     globalPatron[0] = entity.X; globalPatron[1] = entity.Y;
                 }
-                if (i == used - entitySize && globalPatron[0] == -1) return;
+                //if (i == used - entitySize && globalPatron[0] == -1) return;
             }
             for (int i = 0; i < used; i += entitySize)
             {
@@ -222,9 +219,45 @@ namespace SImanager
                         globalPatron[1] >= entity.Y && globalPatron[1] <= (short)(entity.Y + 2))
                     {
                         DestroyObject(i);
+                        return;
                     }
                 }
             }
+        }
+
+        public bool CheckCartHit()
+        {
+            Entity entity;
+            short[] globalBomb = { -1, -1 };
+            for (int i = 0; i < used; i += entitySize)
+            {
+                acc.Read(i, out entity);
+                string name = Marshal.PtrToStringAnsi(entity.TypeA);
+                if (name.Contains("bomb"))
+                {
+                    if (entity.Y > Console.WindowHeight)
+                    {
+                        DestroyObject(i); return false;
+                    }
+                    globalBomb[0] = entity.X; globalBomb[1] = entity.Y;
+                }
+                //if (i == used - entitySize && globalBomb[0] == -1) return;
+            }
+            for (int i = 0; i < used; i += entitySize)
+            {
+                acc.Read(i, out entity);
+                string name = Marshal.PtrToStringAnsi(entity.TypeA);
+                if (name.Contains("cart"))
+                {
+                    if (globalBomb[0] >= entity.X && globalBomb[0] <= (short)(entity.X + 9) &&
+                        globalBomb[1] >= entity.Y && globalBomb[1] <= (short)(entity.Y +3))
+                    {
+                        CartHP -= 1;
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
     }

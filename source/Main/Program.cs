@@ -29,7 +29,7 @@ namespace SpaceInvaders
             object cart = Activator.CreateInstance(CartT); //создание объекта-тачанки
 
 
-            int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] {cart, "cart" }); //вывод тачанки на консоль
+            int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
 
             GenerateLineOfShipsOf(10);
@@ -68,8 +68,8 @@ namespace SpaceInvaders
                     {
                         object patron = Activator.CreateInstance(PatronT);
                         PatronT.GetField("Manager").SetValue(patron, manager);
-
-                        int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { patron, "patron" }); //вывод тачанки на консоль
+                        ManagerT.InvokeMember("CreatePatron", System.Reflection.BindingFlags.InvokeMethod, null, manager, null);
+                        int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "patron" }); //вывод тачанки на консоль
                         PatronT.GetProperty("Offset").SetValue(patron, offset2);
                         PatronT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, patron, null);
                     }
@@ -84,7 +84,7 @@ namespace SpaceInvaders
             for (int i = 0; i < n; i++)
             {
                 object ship = Activator.CreateInstance(ShipT);
-                int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { ship, "ship" + i.ToString() });
+                int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" + i.ToString() });
                 ShipT.GetProperty("Offset").SetValue(ship, offset);
                 ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
             }

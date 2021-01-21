@@ -4,4 +4,5 @@ EXPORTS
 	DrawShip
 	DrawPatron
 	DrawBomb
+	ShowHP
 	InitializeConsole

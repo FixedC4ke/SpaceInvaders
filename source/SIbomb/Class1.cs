@@ -29,6 +29,10 @@ namespace SIbomb
         [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawBomb")]
         internal static extern int DrawBomb(short x, short y, bool clean);
 
+        public static object Manager;
+        private static readonly Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
+
+
         public Bomb()
         {
             mutex = Mutex.OpenExisting(@"Global\SImutex");
@@ -57,7 +61,8 @@ namespace SIbomb
                         acc.Write(Offset, ref entity);
                         DrawBomb(prevpos[0], prevpos[1], true);
                         DrawBomb(entity.X, entity.Y, false);
-
+                        bool hit = (bool)ManagerT.InvokeMember("CheckCartHit", System.Reflection.BindingFlags.InvokeMethod, null, Manager, null);
+                        if (hit) ManagerT.InvokeMember("DestroyObject", System.Reflection.BindingFlags.InvokeMethod, null, Manager, new object[] { Offset });
                     }
                 }
                 mutex.ReleaseMutex();
