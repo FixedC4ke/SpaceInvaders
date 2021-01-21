@@ -33,6 +33,7 @@ namespace SpaceInvaders
             CartT.GetProperty("Offset").SetValue(cart, offset);
 
             GenerateLineOfShipsOf(10);
+            ManagerT.GetProperty("ShipCount").SetValue(manager, 10);
 
             //dynamic activeX = Activator.CreateInstance(SettingsT);
             //Dictionary<string, string> check = (Dictionary<string, string>)SettingsT.InvokeMember("getSettings", System.Reflection.BindingFlags.InvokeMethod, null, activeX, null); //вывод тачанки на консоль

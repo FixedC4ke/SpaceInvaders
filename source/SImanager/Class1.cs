@@ -39,6 +39,8 @@ namespace SImanager
         private static Dictionary<int, dynamic> objects = new Dictionary<int, dynamic>();
         private delegate int HPEvent(short x);
         private event HPEvent HPChanged;
+        public int ShipCount { get; set; }
+        private static Random shiprandom = new Random((int)DateTime.Now.Ticks);
 
         private short hp;
         private short CartHP
@@ -159,20 +161,26 @@ namespace SImanager
         private void CreateBomb(Object source, ElapsedEventArgs e)
         {
             Entity entity;
+            int curship = shiprandom.Next(0, ShipCount);
+            int count = 0;
             for (int i = 0; i < used; i += entitySize)
             {
                 acc.Read(i, out entity);
                 string name = Marshal.PtrToStringAnsi(entity.TypeA);
                 if (name.Contains("ship"))
                 {
-                    dynamic bomb = Activator.CreateInstance(BombT);
-                    BombT.GetField("Manager").SetValue(bomb, this);
+                    if (count == curship)
+                    {
+                        dynamic bomb = Activator.CreateInstance(BombT);
+                        BombT.GetField("Manager").SetValue(bomb, this);
 
-                    globalShip[0] = entity.X;
-                    globalShip[1] = entity.Y;
-                    BombT.GetProperty("Offset").SetValue(bomb, Draw("bomb"));
-                    BombT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, bomb, null);
-                    return;
+                        globalShip[0] = (short)(entity.X + 3);
+                        globalShip[1] = entity.Y;
+                        BombT.GetProperty("Offset").SetValue(bomb, Draw("bomb"));
+                        BombT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, bomb, null);
+                        return;
+                    }
+                    else count++;
                 }
             }
         }
@@ -207,7 +215,6 @@ namespace SImanager
                     }
                     globalPatron[0] = entity.X; globalPatron[1] = entity.Y;
                 }
-                //if (i == used - entitySize && globalPatron[0] == -1) return;
             }
             for (int i = 0; i < used; i += entitySize)
             {
@@ -219,6 +226,7 @@ namespace SImanager
                         globalPatron[1] >= entity.Y && globalPatron[1] <= (short)(entity.Y + 2))
                     {
                         DestroyObject(i);
+                        ShipCount--;
                         return;
                     }
                 }
@@ -241,7 +249,6 @@ namespace SImanager
                     }
                     globalBomb[0] = entity.X; globalBomb[1] = entity.Y;
                 }
-                //if (i == used - entitySize && globalBomb[0] == -1) return;
             }
             for (int i = 0; i < used; i += entitySize)
             {
