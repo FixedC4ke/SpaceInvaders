@@ -58,7 +58,8 @@ namespace SIpatron
                         acc.Write(Offset, ref entity);
                         DrawPatron(prevpos[0], prevpos[1], true);
                         DrawPatron(entity.X, entity.Y, false);
-                        ManagerT.InvokeMember("CheckHit", System.Reflection.BindingFlags.InvokeMethod, null, Manager, null);
+                        bool hit = (bool)ManagerT.InvokeMember("CheckHit", System.Reflection.BindingFlags.InvokeMethod, null, Manager, null);
+                        if (hit) ManagerT.InvokeMember("DestroyObject", System.Reflection.BindingFlags.InvokeMethod, null, Manager, new object[] { Offset });
                     }
                 }
                 mutex.ReleaseMutex();

@@ -32,8 +32,7 @@ namespace SpaceInvaders
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
 
-            GenerateLineOfShipsOf(10);
-            ManagerT.GetProperty("ShipCount").SetValue(manager, 10);
+            GenerateLineOfShipsOf(15);
 
             //dynamic activeX = Activator.CreateInstance(SettingsT);
             //Dictionary<string, string> check = (Dictionary<string, string>)SettingsT.InvokeMember("getSettings", System.Reflection.BindingFlags.InvokeMethod, null, activeX, null); //вывод тачанки на консоль
@@ -88,6 +87,7 @@ namespace SpaceInvaders
                 int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" + i.ToString() });
                 ShipT.GetProperty("Offset").SetValue(ship, offset);
                 ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
+                ManagerT.GetProperty("ShipCount").SetValue(manager, n);
             }
         }
     }

@@ -64,6 +64,11 @@ extern "C" int _stdcall DrawShip(short x, short y, bool clean)
         charInfo[i].Char.AsciiChar = ' ';
         charInfo[i].Attributes = clean ? NULL : BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_RED;
     }
+    charInfo[2].Attributes = NULL;
+    charInfo[3].Attributes = NULL;
+
+    charInfo[7].Attributes = NULL;
+    charInfo[10].Attributes = NULL;
 
     WriteConsoleOutputA(wHnd, charInfo, charBufSize, characterPos, &writeArea);
 

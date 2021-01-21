@@ -16,7 +16,7 @@ namespace SImanager
         int Draw(string name);
         void CreatePatron();
 
-        void CheckHit();
+        bool CheckHit();
         bool CheckCartHit();
         void DestroyObject(int offset);
     }
@@ -79,7 +79,7 @@ namespace SImanager
             }
             else if (name.Contains("ship"))
             {
-                if (prevShipPosition < Console.WindowWidth) prevShipPosition += 10;
+                if (prevShipPosition+10 < Console.WindowWidth) prevShipPosition += 10;
                 else { prevShipPosition = -10; prevShipY += 3; }
                 entity = new Entity()
                 {
@@ -200,7 +200,7 @@ namespace SImanager
             }
         }
 
-        public void CheckHit()
+        public bool CheckHit()
         {
             Entity entity;
             short[] globalPatron = { -1, -1 };
@@ -211,7 +211,7 @@ namespace SImanager
                 if (name.Contains("patron"))
                 {
                     if (entity.Y <= 0) { 
-                        DestroyObject(i); return; 
+                        DestroyObject(i); return false; 
                     }
                     globalPatron[0] = entity.X; globalPatron[1] = entity.Y;
                 }
@@ -227,10 +227,11 @@ namespace SImanager
                     {
                         DestroyObject(i);
                         ShipCount--;
-                        return;
+                        return true;
                     }
                 }
             }
+            return false;
         }
 
         public bool CheckCartHit()
