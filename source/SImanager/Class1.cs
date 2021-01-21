@@ -52,7 +52,6 @@ namespace SImanager
         public static short XglobalCart;
         public static short YglobalCart;
         public static short[] globalShip = new short[2];
-        public static short[] globalPatron = { -1, -1 };
 
         public void Update(Object source, ElapsedEventArgs e)
         {
@@ -80,25 +79,6 @@ namespace SImanager
                         globalShip[1] = entity.Y;
                         BombT.GetProperty("Offset").SetValue(bomb, Draw(bomb, "bomb"));
                         BombT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, bomb, null);
-                    }
-                    if (globalPatron[0] != -1)
-                    {
-                        if (globalPatron[0]>=entity.X && globalPatron[0]<=(short)(entity.X+6)&&
-                            globalPatron[1]>=entity.Y && globalPatron[1] <= (short)(entity.Y + 2))
-                        {
-                            DestroyObject(i);
-                            globalPatron[0] = -1;
-                        }
-                    }
-                }
-                else if (name.Contains("patron"))
-                {
-                    globalPatron[0] = entity.X;
-                    globalPatron[1] = entity.Y;
-                    if (entity.Y < 0)
-                    {
-                        DestroyObject(i);
-                        globalPatron[0] = -1;
                     }
                 }
                 else if (name.Contains("bomb"))
@@ -165,7 +145,7 @@ namespace SImanager
 
                     Entity entity1;
                     int i;
-                    for (i = 0; i<used; i += entitySize)
+                    for (i = 0; i < used; i += entitySize)
                     {
                         acc.Read(i, out entity1);
                         if (Marshal.PtrToStringAnsi(entity1.TypeA).Contains("del"))
@@ -183,7 +163,6 @@ namespace SImanager
                 }
                 mutex.ReleaseMutex();
             }
-            objects.Add(used - entitySize, obj);
             return used - entitySize; //вернуть смещение отображенного объекта
         }
 
@@ -210,6 +189,35 @@ namespace SImanager
         {
             generateBomb = true;
         }
-    }
 
+        public void CheckHit()
+        {
+            Entity entity;
+            short[] globalPatron = { -1, -1 };
+            for (int i = 0; i < used; i += entitySize)
+            {
+                acc.Read(i, out entity);
+                string name = Marshal.PtrToStringAnsi(entity.TypeA);
+                if (name.Contains("patron"))
+                {
+                    globalPatron[0] = entity.X; globalPatron[1] = entity.Y;
+                }
+                if (i == used - entitySize && globalPatron[0] == -1) return;
+            }
+            for (int i = 0; i < used; i += entitySize)
+            {
+                acc.Read(i, out entity);
+                string name = Marshal.PtrToStringAnsi(entity.TypeA);
+                if (name.Contains("ship"))
+                {
+                    if (globalPatron[0] >= entity.X && globalPatron[0] <= (short)(entity.X + 6) &&
+                        globalPatron[1] >= entity.Y && globalPatron[1] <= (short)(entity.Y + 2))
+                    {
+                        DestroyObject(i);
+                    }
+                }
+            }
+        }
+
+    }
 }

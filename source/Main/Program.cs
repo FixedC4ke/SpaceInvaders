@@ -67,6 +67,7 @@ namespace SpaceInvaders
                     if (ready)
                     {
                         object patron = Activator.CreateInstance(PatronT);
+                        PatronT.GetField("Manager").SetValue(patron, manager);
 
                         int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { patron, "patron" }); //вывод тачанки на консоль
                         PatronT.GetProperty("Offset").SetValue(patron, offset2);

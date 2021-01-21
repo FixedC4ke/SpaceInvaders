@@ -28,7 +28,8 @@ namespace SIpatron
         private System.Timers.Timer t = new System.Timers.Timer(50);
         [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawPatron")]
         internal static extern int DrawPatron(short x, short y, bool clean);
-
+        private static readonly Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
+        public static object Manager;
 
         public Patron()
         {
@@ -56,6 +57,7 @@ namespace SIpatron
                         acc.Write(Offset, ref entity);
                         DrawPatron(prevpos[0], prevpos[1], true);
                         DrawPatron(entity.X, entity.Y, false);
+                        ManagerT.InvokeMember("CheckHit", System.Reflection.BindingFlags.InvokeMethod, null, Manager, null);
                     }
                 }
                 mutex.ReleaseMutex();
