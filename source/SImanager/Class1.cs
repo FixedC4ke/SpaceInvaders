@@ -190,6 +190,11 @@ namespace SImanager
             generateBomb = true;
         }
 
+        public void CreatePatron()
+        {
+
+        }
+
         public void CheckHit()
         {
             Entity entity;

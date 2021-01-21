@@ -27,20 +27,23 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 extern "C" int _stdcall DrawCart(short x, short y, bool clean)
 {
     HANDLE wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
-    
 
-    SMALL_RECT srctWriteRect = { x, y, x+9, x+5 };
-    COORD crd = { 0, 0 };
-    COORD bsize = { 9, 3 };
+    CHAR_INFO charInfo[9 * 3];
 
-    CHAR_INFO chInfo[9 * 3];
-    for (size_t i = 0; i < 9 * 3; ++i)
+    COORD charBufSize = { 9, 3 };   
+    COORD characterPos = { 0, 0 }; 
+    SMALL_RECT writeArea = { x, y, x + 9, y + 3 };
+
+
+    for (int i = 0; i < (9 * 3); i++)
     {
-        chInfo[i].Char.AsciiChar = clean?NULL:' ';
-        chInfo[i].Attributes = clean?7:BACKGROUND_GREEN;
+        charInfo[i].Char.AsciiChar = ' ';
+        charInfo[i].Attributes = clean?NULL:BACKGROUND_GREEN;
     }
 
-    WriteConsoleOutputA(wHnd, chInfo, bsize, crd, &srctWriteRect);
+    WriteConsoleOutputA(wHnd, charInfo, charBufSize, characterPos, &writeArea);
+
+
     return 0;
 }
 
@@ -48,18 +51,21 @@ extern "C" int _stdcall DrawShip(short x, short y, bool clean)
 {
     HANDLE wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    SMALL_RECT srctWriteRect = { x, y, x + 6, x + 2 };
-    COORD crd = { 0, 0 };
-    COORD bsize = { 6, 2 };
+    CHAR_INFO charInfo[6 * 2];
 
-    CHAR_INFO chInfo[6 * 2];
-    for (size_t i = 0; i < 6 * 2; ++i)
+    COORD charBufSize = { 6, 2 };
+    COORD characterPos = { 0, 0 };
+    SMALL_RECT writeArea = { x, y, x + 6, y + 2 };
+
+
+    for (int i = 0; i < (6 * 2); i++)
     {
-        chInfo[i].Char.AsciiChar = clean ? NULL : ' ';
-        chInfo[i].Attributes = clean ? 7 : BACKGROUND_BLUE | BACKGROUND_GREEN | BACKGROUND_RED;
+        charInfo[i].Char.AsciiChar = ' ';
+        charInfo[i].Attributes = clean ? NULL : BACKGROUND_GREEN|BACKGROUND_BLUE|BACKGROUND_RED;
     }
 
-    WriteConsoleOutputA(wHnd, chInfo, bsize, crd, &srctWriteRect);
+    WriteConsoleOutputA(wHnd, charInfo, charBufSize, characterPos, &writeArea);
+
     return 0;
 }
 
@@ -67,18 +73,20 @@ extern "C" int _stdcall DrawPatron(short x, short y, bool clean)
 {
     HANDLE wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    SMALL_RECT srctWriteRect = { x, y, x + 1, x + 2 };
-    COORD crd = { 0, 0 };
-    COORD bsize = { 1, 2 };
+    CHAR_INFO charInfo[1 * 2];
 
-    CHAR_INFO chInfo[1 * 2];
-    for (size_t i = 0; i < 1 * 2; ++i)
+    COORD charBufSize = { 1, 2 };
+    COORD characterPos = { 0, 0 };
+    SMALL_RECT writeArea = { x, y, x + 1, y + 2 };
+
+
+    for (int i = 0; i < (1 * 2); i++)
     {
-        chInfo[i].Char.AsciiChar = clean ? NULL : ' ';
-        chInfo[i].Attributes = clean ? 7 : BACKGROUND_RED;
+        charInfo[i].Char.AsciiChar = ' ';
+        charInfo[i].Attributes = clean ? NULL : BACKGROUND_RED;
     }
 
-    WriteConsoleOutputA(wHnd, chInfo, bsize, crd, &srctWriteRect);
+    WriteConsoleOutputA(wHnd, charInfo, charBufSize, characterPos, &writeArea);
     return 0;
 }
 
@@ -86,18 +94,20 @@ extern "C" int _stdcall DrawBomb(short x, short y, bool clean)
 {
     HANDLE wHnd = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    SMALL_RECT srctWriteRect = { x, y, x + 1, x + 2 };
-    COORD crd = { 0, 0 };
-    COORD bsize = { 1, 2 };
+    CHAR_INFO charInfo[1 * 2];
 
-    CHAR_INFO chInfo[1 * 2];
-    for (size_t i = 0; i < 1 * 2; ++i)
+    COORD charBufSize = { 1, 2 };
+    COORD characterPos = { 0, 0 };
+    SMALL_RECT writeArea = { x, y, x + 1, y + 2 };
+
+
+    for (int i = 0; i < (1 * 2); i++)
     {
-        chInfo[i].Char.AsciiChar = clean ? NULL : ' ';
-        chInfo[i].Attributes = clean ? 7 : BACKGROUND_RED|BACKGROUND_GREEN;
+        charInfo[i].Char.AsciiChar = ' ';
+        charInfo[i].Attributes = clean ? NULL : BACKGROUND_RED|BACKGROUND_GREEN;
     }
 
-    WriteConsoleOutputA(wHnd, chInfo, bsize, crd, &srctWriteRect);
+    WriteConsoleOutputA(wHnd, charInfo, charBufSize, characterPos, &writeArea);
     return 0;
 }
 
@@ -113,5 +123,8 @@ extern "C" int _stdcall InitializeConsole() {
     SetConsoleScreenBufferSize(wHnd, bufsize);
     SetConsoleCursorInfo(wHnd, &cinfo);
     SetConsoleTitleA("Space Invaders");
+    DWORD outp;
+    COORD fcord = { 0, 0 };
+    COORD cpos = { 20, 50 };
     return 0;
 }
