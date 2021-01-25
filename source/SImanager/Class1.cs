@@ -43,7 +43,7 @@ namespace SImanager
         private static Random shiprandom = new Random((int)DateTime.Now.Ticks);
 
         private short hp;
-        private short CartHP
+        public short CartHP
         {
             get { return hp; }
             set { HPChanged(value); hp = value; }

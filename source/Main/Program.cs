@@ -6,6 +6,8 @@ using Microsoft.Win32.SafeHandles;
 using System.IO.MemoryMappedFiles;
 using System.Threading;
 using System.Collections.Generic;
+using Microsoft.VisualBasic;
+
 
 namespace SpaceInvaders
 {
@@ -34,9 +36,15 @@ namespace SpaceInvaders
 
             GenerateLineOfShipsOf(15);
 
+
+            MSScriptControl.ScriptControl sc = new MSScriptControl.ScriptControl();
+            sc.Language = "VBScript";
+            sc.AddCode("Function LevelSel() LevelSel = InputBox(\"Введите кол-во жизней:\", \"ScriptControl\", 1) End Function");
+            ManagerT.GetProperty("CartHP").SetValue(manager, short.Parse(sc.Run("LevelSel")));
+
             //dynamic activeX = Activator.CreateInstance(SettingsT);
             //Dictionary<string, string> check = (Dictionary<string, string>)SettingsT.InvokeMember("getSettings", System.Reflection.BindingFlags.InvokeMethod, null, activeX, null); //вывод тачанки на консоль
-            
+
             //string value = "";
             //if (check.TryGetValue("string1", out value))
             //{
