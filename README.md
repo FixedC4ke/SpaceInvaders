@@ -7,3 +7,4 @@
 * внутрипроцессные объекты
 * события
 * ActiveX
+* MSScriptControl
