@@ -18,7 +18,7 @@ namespace SpaceInvaders
         private static readonly Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
         private static readonly Type PatronT = Type.GetTypeFromProgID("SIpatron.Patron");
         private static readonly Type SettingsT = Type.GetTypeFromProgID("SettingsActiveX.pdf_Reader");
-
+        private static Semaphore sem;
         private static object manager;
         [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "InitializeConsole")]
         internal static extern int InitializeConsole();
@@ -34,7 +34,7 @@ namespace SpaceInvaders
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
 
-            GenerateLineOfShipsOf(15);
+            GenerateLineOfShipsOf(10);
 
 
             MSScriptControl.ScriptControl sc = new MSScriptControl.ScriptControl();
@@ -77,7 +77,7 @@ namespace SpaceInvaders
                         object patron = Activator.CreateInstance(PatronT);
                         PatronT.GetField("Manager").SetValue(patron, manager);
                         ManagerT.InvokeMember("CreatePatron", System.Reflection.BindingFlags.InvokeMethod, null, manager, null);
-                        int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "patron" }); //вывод тачанки на консоль
+                        int offset2 = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "patron" });
                         PatronT.GetProperty("Offset").SetValue(patron, offset2);
                         PatronT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, patron, null);
                     }
@@ -89,14 +89,23 @@ namespace SpaceInvaders
 
         static void GenerateLineOfShipsOf(int n)
         {
+            sem = new Semaphore(n, n); // семафор: первый параметр - какому числу объектов изначально доступен семафор, второй - максимальное число объектов, его использующих
             for (int i = 0; i < n; i++)
             {
-                object ship = Activator.CreateInstance(ShipT);
-                int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" + i.ToString() });
-                ShipT.GetProperty("Offset").SetValue(ship, offset);
-                ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
-                ManagerT.GetProperty("ShipCount").SetValue(manager, n);
+                Thread thr = new Thread(new ThreadStart(CreateShip));
+                thr.Start();
             }
+            ManagerT.GetProperty("ShipCount").SetValue(manager, (int)n);
+        }
+
+        static void CreateShip()
+        {
+            object ship = Activator.CreateInstance(ShipT);
+            sem.WaitOne();
+            int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" });
+            sem.Release();
+            ShipT.GetProperty("Offset").SetValue(ship, offset);
+            ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
         }
     }
 }

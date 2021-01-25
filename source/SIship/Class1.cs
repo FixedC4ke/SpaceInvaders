@@ -22,7 +22,6 @@ namespace SIship
     public class Ship : IShip
     {
         public int Offset { get; set; }
-
         private bool movesToRight = true;
         private int maxX;
         private int entitySize = Marshal.SizeOf(typeof(Entity));
