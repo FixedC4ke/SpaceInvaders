@@ -8,3 +8,5 @@
 * события
 * ActiveX
 * MSScriptControl
+* Многопоточность
+* Семафоры
