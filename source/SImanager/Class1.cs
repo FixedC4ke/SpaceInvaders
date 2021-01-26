@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO.MemoryMappedFiles;
 using System.Timers;
+using Microsoft.VisualBasic;
 
 namespace SImanager
 {
@@ -26,33 +27,48 @@ namespace SImanager
     {
         private static readonly int length = 1024;
         private int used = 0;
+
         private short prevShipPosition = -10;
         private short prevShipY = 0;
+
         private static int entitySize = Marshal.SizeOf(typeof(Entity));
+
         private static MemoryMappedFile mmFile = MemoryMappedFile.CreateFromFile("test.mmf", System.IO.FileMode.Create, @"Global\SImmf", length);
         private static MemoryMappedViewAccessor acc = mmFile.CreateViewAccessor(0, length, MemoryMappedFileAccess.Read);
+
         private static Type BombT = Type.GetTypeFromProgID("SIbomb.Bomb");
-        private static readonly Type ManagerT = Type.GetTypeFromProgID("SImanager.Manager");
-        private static readonly Type ShipT = Type.GetTypeFromProgID("SIship.Ship");
-        private static readonly Type CartT = Type.GetTypeFromProgID("SIcart.Cart");
-        private static readonly Type PatronT = Type.GetTypeFromProgID("SIpatron.Patron");
+
         private static Dictionary<int, dynamic> objects = new Dictionary<int, dynamic>();
         private delegate int HPEvent(short x);
+        private static int Score = 2;
         private event HPEvent HPChanged;
-        public int ShipCount { get; set; }
+        public int InitialShipCount { get { return ShipCount; }
+            set { ShipCount = value; }
+        }
+        private int ShipCount;
         private static Random shiprandom = new Random((int)DateTime.Now.Ticks);
+        private delegate void EndGameDel();
+        private event EndGameDel EndGame;
+        System.Timers.Timer tb;
+        public double BombTimerMs
+        {
+            get { return tb.Interval; }
+            set { tb.Interval = value; }
+        }
 
+        public int CurrentLevel { get; set; }
         private short hp;
         public short CartHP
         {
             get { return hp; }
-            set { HPChanged(value); hp = value; }
+            set { HPChanged(value); if (value == 0) EndGame(); hp = value; }
         }
-        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "ShowHP")]
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "ShowHP")]
         internal static extern int ShowHP(short x);
+        dynamic WSCObject;
         public Manager()
         {
-            System.Timers.Timer tb = new System.Timers.Timer(5000);
+            tb = new System.Timers.Timer(10000);
             tb.Elapsed += CreateBomb;
             tb.AutoReset = true;
             tb.Enabled = true;
@@ -60,10 +76,18 @@ namespace SImanager
             CartHP = 3;
             Mutex mutex = new Mutex(false, @"Global\SImutex");
             entitySize = Marshal.SizeOf(typeof(Entity));
+            WSCObject = (dynamic)Microsoft.VisualBasic.Interaction.GetObject(@"script:C:\Windows\SysWOW64\GameOver.wsc", null);
+            EndGame += Test;
         }
         public static short XglobalCart;
         public static short YglobalCart;
         public static short[] globalShip = new short[2];
+
+        public void Test()
+        {
+            WSCObject.EndGame((InitialShipCount-ShipCount).ToString(), 2.ToString()) ;
+            Environment.Exit(0);
+        }
 
         public int Draw(string name)
         {
@@ -161,7 +185,7 @@ namespace SImanager
         private void CreateBomb(Object source, ElapsedEventArgs e)
         {
             Entity entity;
-            int curship = shiprandom.Next(0, ShipCount);
+            int curship = shiprandom.Next(0, InitialShipCount);
             int count = 0;
             for (int i = 0; i < used; i += entitySize)
             {
@@ -226,7 +250,7 @@ namespace SImanager
                         globalPatron[1] >= entity.Y && globalPatron[1] <= (short)(entity.Y + 2))
                     {
                         DestroyObject(i);
-                        ShipCount--;
+                        InitialShipCount--;
                         return true;
                     }
                 }

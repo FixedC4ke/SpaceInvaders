@@ -22,12 +22,17 @@ namespace SIcart
     [ClassInterface(ClassInterfaceType.None)]
     public class Cart : ICart
     {
-        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawCart")]
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "DrawCart")]
         internal static extern int DrawCart(short x, short y, bool clean);
         public int Offset { get; set; }
         private static Mutex mutex;
         private bool readytoshoot = true;
         private static System.Timers.Timer shottimer = new System.Timers.Timer();
+        public double RechargeTimerMs
+        {
+            get { return shottimer.Interval; }
+            set { shottimer.Interval = value; }
+        }
         public Cart()
         {
             mutex = Mutex.OpenExisting(@"Global\SImutex");

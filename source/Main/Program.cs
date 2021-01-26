@@ -27,34 +27,28 @@ namespace SpaceInvaders
         {
             InitializeConsole();
             manager = Activator.CreateInstance(ManagerT); //создание объекта-диспетчера
+            ManagerT.GetProperty("BombTimerMs").SetValue(manager, 5000);
 
             object cart = Activator.CreateInstance(CartT); //создание объекта-тачанки
 
 
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
+            CartT.GetProperty("RechargeTimerMs").SetValue(cart, 2000);
 
-            GenerateLineOfShipsOf(10);
+            //GenerateLineOfShipsOf(10);
 
 
             MSScriptControl.ScriptControl sc = new MSScriptControl.ScriptControl();
             sc.Language = "VBScript";
-            sc.AddCode("Function LevelSel() LevelSel = InputBox(\"Введите кол-во жизней:\", \"ScriptControl\", 1) End Function");
-            ManagerT.GetProperty("CartHP").SetValue(manager, short.Parse(sc.Run("LevelSel")));
+            sc.AddCode("Function LevelSel() LevelSel = InputBox(\"Введите номер уровня:\", \"ScriptControl\", 1) End Function");
+            int level = int.Parse(sc.Run("LevelSel"));
 
-            //dynamic activeX = Activator.CreateInstance(SettingsT);
-            //Dictionary<string, string> check = (Dictionary<string, string>)SettingsT.InvokeMember("getSettings", System.Reflection.BindingFlags.InvokeMethod, null, activeX, null); //вывод тачанки на консоль
+            dynamic activeX = Activator.CreateInstance(SettingsT);
+            Dictionary<string, string> check = (Dictionary<string, string>)SettingsT.InvokeMember("getSettings", System.Reflection.BindingFlags.InvokeMethod, null, activeX, new object[] { level }); //вывод тачанки на консоль
 
-            //string value = "";
-            //if (check.TryGetValue("string1", out value))
-            //{
-            //    Console.WriteLine("For key = \"tif\", value = {0}.", value);
-            //}
-            //else
-            //{
-            //    Console.WriteLine("Key = \"tif\" is not found.");
-            //}
-            //GenerateLineOfShipsOf(Int32.Parse(value));
+            check.TryGetValue("countEnemies", out string counten);
+            GenerateLineOfShipsOf(Int32.Parse(counten));
 
             while (true) //обработка нажатия клавиш
             {
@@ -95,7 +89,7 @@ namespace SpaceInvaders
                 Thread thr = new Thread(new ThreadStart(CreateShip));
                 thr.Start();
             }
-            ManagerT.GetProperty("ShipCount").SetValue(manager, (int)n);
+            ManagerT.GetProperty("InitialShipCount").SetValue(manager, (int)n);
         }
 
         static void CreateShip()
@@ -105,6 +99,7 @@ namespace SpaceInvaders
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" });
             sem.Release();
             ShipT.GetProperty("Offset").SetValue(ship, offset);
+            ShipT.GetProperty("ShipSpeed").SetValue(ship, 500);
             ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
         }
     }

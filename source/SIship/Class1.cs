@@ -29,8 +29,13 @@ namespace SIship
         private static Mutex mutex;
         private static MemoryMappedFile mmFile;
         private System.Timers.Timer t = new System.Timers.Timer(500);
-        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawShip")]
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "DrawShip")]
         internal static extern int DrawShip(short x, short y, bool clean);
+        public double ShipSpeed
+        {
+            get { return t.Interval; }
+            set { t.Interval = value; }
+        }
 
         public Ship()
         {

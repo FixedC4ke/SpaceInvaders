@@ -26,7 +26,7 @@ namespace SIbomb
         public int Offset { get; set; }
         private static Mutex mutex;
         private System.Timers.Timer t = new System.Timers.Timer(50);
-        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "DrawBomb")]
+        [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "DrawBomb")]
         internal static extern int DrawBomb(short x, short y, bool clean);
 
         public static object Manager;
