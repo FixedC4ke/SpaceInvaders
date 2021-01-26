@@ -20,6 +20,9 @@ namespace SpaceInvaders
         private static readonly Type SettingsT = Type.GetTypeFromProgID("SettingsActiveX.pdf_Reader");
         private static Semaphore sem;
         private static object manager;
+
+        public static double ShipSpeed { get; set; }
+
         [DllImport("SIConsoleAPI.dll", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi, EntryPoint = "InitializeConsole")]
         internal static extern int InitializeConsole();
 
@@ -27,16 +30,12 @@ namespace SpaceInvaders
         {
             InitializeConsole();
             manager = Activator.CreateInstance(ManagerT); //создание объекта-диспетчера
-            ManagerT.GetProperty("BombTimerMs").SetValue(manager, 5000);
 
             object cart = Activator.CreateInstance(CartT); //создание объекта-тачанки
 
 
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "cart" }); //вывод тачанки на консоль
             CartT.GetProperty("Offset").SetValue(cart, offset);
-            CartT.GetProperty("RechargeTimerMs").SetValue(cart, 2000);
-
-            //GenerateLineOfShipsOf(10);
 
 
             MSScriptControl.ScriptControl sc = new MSScriptControl.ScriptControl();
@@ -49,6 +48,13 @@ namespace SpaceInvaders
 
             check.TryGetValue("countEnemies", out string counten);
             GenerateLineOfShipsOf(Int32.Parse(counten));
+
+            check.TryGetValue("speedCart", out string speed);
+            ShipSpeed = double.Parse(speed);
+
+            check.TryGetValue("frequencyShot", out string freq);
+            CartT.GetProperty("RechargeTimerMs").SetValue(cart, double.Parse(freq));
+
 
             while (true) //обработка нажатия клавиш
             {
@@ -99,7 +105,7 @@ namespace SpaceInvaders
             int offset = (int)ManagerT.InvokeMember("Draw", System.Reflection.BindingFlags.InvokeMethod, null, manager, new object[] { "ship" });
             sem.Release();
             ShipT.GetProperty("Offset").SetValue(ship, offset);
-            ShipT.GetProperty("ShipSpeed").SetValue(ship, 500);
+            ShipT.GetProperty("ShipSpeed").SetValue(ship, ShipSpeed);
             ShipT.InvokeMember("Action", System.Reflection.BindingFlags.InvokeMethod, null, ship, new object[] { Console.BufferWidth - 5 });
         }
     }
