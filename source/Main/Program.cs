@@ -42,18 +42,19 @@ namespace SpaceInvaders
             sc.Language = "VBScript";
             sc.AddCode("Function LevelSel() LevelSel = InputBox(\"Введите номер уровня:\", \"ScriptControl\", 1) End Function");
             int level = int.Parse(sc.Run("LevelSel"));
-
+            ManagerT.GetProperty("CurrentLevel").SetValue(manager, level);
             dynamic activeX = Activator.CreateInstance(SettingsT);
             Dictionary<string, string> check = (Dictionary<string, string>)SettingsT.InvokeMember("getSettings", System.Reflection.BindingFlags.InvokeMethod, null, activeX, new object[] { level }); //вывод тачанки на консоль
 
             check.TryGetValue("countEnemies", out string counten);
-            GenerateLineOfShipsOf(Int32.Parse(counten));
 
             check.TryGetValue("speedCart", out string speed);
             ShipSpeed = double.Parse(speed);
 
             check.TryGetValue("frequencyShot", out string freq);
             CartT.GetProperty("RechargeTimerMs").SetValue(cart, double.Parse(freq));
+
+            GenerateLineOfShipsOf(Int32.Parse(counten));
 
 
             while (true) //обработка нажатия клавиш

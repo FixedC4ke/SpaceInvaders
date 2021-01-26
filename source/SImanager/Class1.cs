@@ -40,10 +40,10 @@ namespace SImanager
 
         private static Dictionary<int, dynamic> objects = new Dictionary<int, dynamic>();
         private delegate int HPEvent(short x);
-        private static int Score = 2;
         private event HPEvent HPChanged;
-        public int InitialShipCount { get { return ShipCount; }
-            set { ShipCount = value; }
+        private int initialshipcount;
+        public int InitialShipCount { get { return initialshipcount; }
+            set { ShipCount = value; initialshipcount = value; }
         }
         private int ShipCount;
         private static Random shiprandom = new Random((int)DateTime.Now.Ticks);
@@ -73,19 +73,19 @@ namespace SImanager
             tb.AutoReset = true;
             tb.Enabled = true;
             HPChanged += ShowHP;
-            CartHP = 3;
+            CartHP = 1;
             Mutex mutex = new Mutex(false, @"Global\SImutex");
             entitySize = Marshal.SizeOf(typeof(Entity));
-            WSCObject = (dynamic)Microsoft.VisualBasic.Interaction.GetObject(@"script:C:\Windows\SysWOW64\GameOver.wsc", null);
-            EndGame += Test;
+            WSCObject = (dynamic)Microsoft.VisualBasic.Interaction.GetObject("script:"+Environment.CurrentDirectory+"\\GameOver.wsc", null);
+            EndGame += GameEnded;
         }
         public static short XglobalCart;
         public static short YglobalCart;
         public static short[] globalShip = new short[2];
 
-        public void Test()
+        public void GameEnded()
         {
-            WSCObject.EndGame((InitialShipCount-ShipCount).ToString(), 2.ToString()) ;
+            WSCObject.EndGame((InitialShipCount-ShipCount).ToString(), CurrentLevel.ToString()) ;
             Environment.Exit(0);
         }
 
@@ -185,7 +185,7 @@ namespace SImanager
         private void CreateBomb(Object source, ElapsedEventArgs e)
         {
             Entity entity;
-            int curship = shiprandom.Next(0, InitialShipCount);
+            int curship = shiprandom.Next(0, ShipCount);
             int count = 0;
             for (int i = 0; i < used; i += entitySize)
             {
@@ -250,7 +250,7 @@ namespace SImanager
                         globalPatron[1] >= entity.Y && globalPatron[1] <= (short)(entity.Y + 2))
                     {
                         DestroyObject(i);
-                        InitialShipCount--;
+                        ShipCount--;
                         return true;
                     }
                 }

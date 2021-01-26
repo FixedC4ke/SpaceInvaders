@@ -25,7 +25,7 @@ namespace SettingsActiveX
 
             Excel.Application ex = new Microsoft.Office.Interop.Excel.Application();
             Excel.Application ObjWorkExcel = new Excel.Application(); // Объявляем приложение
-            Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(@"Settings.xlsx", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); // Открываем файл
+            Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(Environment.CurrentDirectory+"\\Settings.xlsx", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); // Открываем файл
 
             // ex.Visible = true; // Отобразить Excel
             // ex.DisplayAlerts = false; // Отключить отображение окон с сообщениями
